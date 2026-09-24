@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>华园搭子</title>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --bg-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-main: #333;
+            --text-sub: #666;
+            --nav-height: 60px;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* 手机容器模拟 */
+        #app-container {
+            width: 100%;
+            max-width: 414px; /* iPhone Max width */
+            height: 100%;
+            background: var(--bg-gradient);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        /* 顶部导航 */
+        header {
+            padding: 15px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-weight: 800;
+            font-size: 20px;
+            color: var(--primary-color);
+        }
+        /* 页面内容区域 */
+        .page-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; /* 留出底部导航空间 */
+            display: none; /* 默认隐藏 */
+            animation: fadeIn 0.3s ease;
+        }
+        .page-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* 首页 Banner */
+        .banner {
+            width: 100%;
+            height: 160px;
+            border-radius: 16px;
+            background-image: url('data:image/webp;base64,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');
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .banner-text {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        /* 活动卡片 */
+        .activity-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 12px;
+        }
+        .card-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #ddd;
+        }
+        .card-info {
+            flex: 1;
+        }
+        .card-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+        .card-meta {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .card-tags {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        .tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #e1f0ff;
+            color: var(--primary-color);
+        }
+        .join-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        /* 底部导航 */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #eee;
+            z-index: 20;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+            color: #999;
+            cursor: pointer;
+        }
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        /* 发布页面 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+        }
+        .form-textarea {
+            height: 100px;
+            resize: none;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        /* 匹配页面 */
+        .match-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .match-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+        }
+        .match-score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin: 10px 0;
+        }
+        .match-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        /* 个人主页 */
+        .profile-header {
+            height: 180px;
+            background-image: url('https://tr-osdcp.qunarzz.com/tr-osd-tr-space/img/0eb257f82f99883be2ffe064b6a65049.jpg_r_680x453x95_572962c4.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 16px;
+            position: relative;
+            margin-bottom: 60px; /* Space for avatar overlap */
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid white;
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            object-fit: cover;
+        }
+        .profile-info {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .profile-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .profile-school {
+            font-size: 14px;
+            color: var(--text-sub);
+            background: #eee;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .profile-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 10px;
+        }
+        .profile-tag {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div id="app-container">
+    <header>
+        <div class="logo">华园搭子</div>
+        <div style="font-size: 12px; color: #666;">泉州市</div>
+    </header>
+    <!-- 首页：活动列表 -->
+    <div id="page-home" class="page-content active">
+        <div class="banner">
+            <div class="banner-text">
+                <h3>我在华大<br>找搭子</h3>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; color: #555; font-size: 14px;">
+            <span style="font-weight: bold; border-bottom: 2px solid var(--primary-color); padding-bottom: 4px;">最新发布</span>
+            <span>距离</span>
+            <span>时间</span>
+        </div>
+        <div id="activity-list">
+            <!-- 活动卡片将通过JS插入 -->
+        </div>
+    </div>
+    <!-- 匹配页面 -->
+    <div id="page-match" class="page-content">
+        <h2 style="margin-bottom: 20px; color: #333;">为你推荐的好友</h2>
+        <div id="match-list">
+            <!-- 匹配卡片 -->
+        </div>
+    </div>
+    <!-- 发布页面 -->
+    <div id="page-publish" class="page-content">
+        <h2 style="margin-bottom: 20px;">发布新活动</h2>
+        <div class="form-group">
+            <label class="form-label">活动标题</label>
+            <input type="text" class="form-input" id="pub-title" placeholder="例如：周末羽毛球局">
+        </div>
+        <div class="form-group">
+            <label class="form-label">标签</label>
+            <select class="form-select" id="pub-tag">
+                <option value="运动">运动</option>
+                <option value="戏剧">戏剧</option>
+                <option value="学习">学习</option>
+                <option value="户外">户外</option>
+                <option value="电影">电影</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">时间</label>
+            <input type="text" class="form-input" id="pub-time" placeholder="例如：今天 20:00">
+        </div>
+        <div class="form-group">
+            <label class="form-label">地点</label>
+            <input type="text" class="form-input" id="pub-loc" placeholder="例如：西操场">
+        </div>
+        <div class="form-group">
+            <label class="form-label">人数限制</label>
+            <input type="number" class="form-input" id="pub-limit" placeholder="例如：10">
+        </div>
+        <div class="form-group">
+            <label class="form-label">详细描述</label>
+            <textarea class="form-textarea" id="pub-desc" placeholder="活动详情..."></textarea>
+        </div>
+        <button class="submit-btn" onclick="publishActivity()">发布活动</button>
+    </div>
+    <!-- 我的页面 -->
+    <div id="page-profile" class="page-content">
+        <div class="profile-header">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=momo&backgroundColor=b6e3f4" class="profile-avatar" alt="Avatar">
+        </div>
+        <div class="profile-info">
+            <div class="profile-name">momo</div>
+            <div class="profile-school">华侨大学 | 外国语学院</div>
+            <p style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                ENFP找华大好朋鱿~🎾🎬
+            </p>
+            <div class="profile-tags">
+                <span class="profile-tag">🎾 网球</span>
+                <span class="profile-tag">🏸 羽毛球</span>
+                <span class="profile-tag">🥾 徒步</span>
+                <span class="profile-tag">🎬 看电影</span>
+                <span class="profile-tag">🦑 斯普拉遁</span>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; background: white; border-radius: 12px; padding: 15px;">
+            <h4 style="margin-bottom: 10px;">我的活动</h4>
+            <div style="font-size: 13px; color: #999; text-align: center; padding: 20px;">暂无发布记录</div>
+        </div>
+    </div>
+    <!-- 底部导航栏 -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home', this)">
+            <div class="nav-icon">🏠</div>
+            <div>首页</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('match', this)">
+            <div class="nav-icon">💞</div>
+            <div>匹配</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('publish', this)">
+            <div class="nav-icon">➕</div>
+            <div>发布</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('profile', this)">
+            <div class="nav-icon">👤</div>
+            <div>我的</div>
+        </div>
+    </nav>
+</div>
+<script>
+    // 模拟数据
+    const activities = [
+        {
+            title: "创高打卡",
+            tag: "运动",
+            time: "今天 20:00",
+            loc: "西操场",
+            limit: 10,
+            joined: 6,
+            img: "https://ts3.tc.mm.bing.net/th/id/OIP-C.xyVBkSmv9sPtArB7FrWdmwHaFj?r=0&rs=1&pid=ImgDetMain&o=7&rm=3"
+        },
+        {
+            title: "晨读",
+            tag: "阅读",
+            time: "周六 7:00",
+            loc: "秋中湖",
+            limit: 6,
+            joined: 4,
+            img: "https://youimg1.c-ctrip.com/target/10090s000000iaxrfD8BD.jpg"
+        },
+        {
+            title: "周末羽毛球双打",
+            tag: "运动",
+            time: "周日 09:30",
+            loc: "华大体育馆",
+            limit: 4,
+            joined: 2,
+            img: "https://tse3-mm.cn.bing.net/th/id/OIP-C.sQk5ekdhVEvd9rRZB3MYCQHaEo?w=276&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3"
+        },
+        {
+            title: "一起看泉州梨园戏",
+            tag: "戏剧",
+            time: "周日 19:00",
+            loc: "西街",
+            limit: 2,
+            joined: 1,
+            img: "https://bkimg.cdn.bcebos.com/smart/58ee3d6d55fbb2fb431694936b1337a4462308f776a2-bkimg-process,v_1,rw_378,rh_252,maxl_756?x-bce-process=image/format,f_auto"
+        }
+    ];
+    // 模拟匹配数据
+    const matches = [
+        {
+            name: "Alex",
+            school: "INFP | 计算机系",
+            score: 98,
+            tags: ["🎾 网球", "🏸 羽毛球", "🎮 游戏"],
+            img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&backgroundColor=c0aede"
+        },
+        {
+            name: "Sarah",
+            school: "ISTJ | 艺术学院",
+            score: 85,
+            tags: ["🎬 看电影", "📷 摄影", "☕ 咖啡"],
+            img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah&backgroundColor=ffd5dc"
+        }
+    ];
+    // 初始化渲染
+    function renderActivities() {
+        const container = document.getElementById('activity-list');
+        container.innerHTML = '';
+        activities.forEach(act => {
+            const html = `
+                <div class="activity-card">
+                    <img src="${act.img}" class="card-img" alt="cover">
+                    <div class="card-info">
+                        <div class="card-title">${act.title}</div>
+                        <div class="card-meta">🕒 ${act.time}</div>
+                        <div class="card-meta">📍 ${act.loc}</div>
+                        <div class="card-tags">
+                            <span class="tag">${act.tag}</span>
+                            <span class="tag">${act.joined}/${act.limit}人</span>
+                        </div>
+                        <button class="join-btn" onclick="joinActivity(this)">参加</button>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += html;
+        });
+    }
+    function renderMatches() {
+        const container = document.getElementById('match-list');
+        container.innerHTML = '';
+        matches.forEach(match => {
+            const html = `
+                <div class="match-card">
+                    <img src="${match.img}" class="match-avatar" alt="avatar">
+                    <h3>${match.name}</h3>
+                    <div style="font-size: 12px; color: #666;">${match.school}</div>
+                    <div class="match-score">匹配度 ${match.score}%</div>
+                    <div class="match-tags">
+                        ${match.tags.map(t => `<span class="tag" style="background:#ffecec; color:#ff6b6b">${t}</span>`).join('')}
+                    </div>
+                    <button class="join-btn" style="margin-top: 15px; width: 100%;">打招呼</button>
+                </div>
+            `;
+            container.innerHTML += html;
+        });
+    }
+    // 交互逻辑
+    function switchTab(pageId, navElement) {
+        // 隐藏所有页面
+        document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
+        // 显示目标页面
+        document.getElementById('page-' + pageId).classList.add('active');
+        
+        // 更新导航状态
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        navElement.classList.add('active');
+    }
+    function joinActivity(btn) {
+        btn.innerText = "已报名";
+        btn.style.background = "#ccc";
+        btn.disabled = true;
+        alert("报名成功！期待你的参与。");
+    }
+    function publishActivity() {
+        const title = document.getElementById('pub-title').value;
+        const tag = document.getElementById('pub-tag').value;
+        const time = document.getElementById('pub-time').value;
+        const loc = document.getElementById('pub-loc').value;
+        
+        if(!title || !time || !loc) {
+            alert("请填写完整信息");
+            return;
+        }
+        // 模拟添加到列表
+        activities.unshift({
+            title: title,
+            tag: tag,
+            time: time,
+            loc: loc,
+            limit: document.getElementById('pub-limit').value || 10,
+            joined: 1, // 发布者自己
+            img: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" // 默认图
+        });
+        renderActivities();
+        alert("活动发布成功！");
+        
+        // 清空表单
+        document.getElementById('pub-title').value = '';
+        document.getElementById('pub-time').value = '';
+        document.getElementById('pub-loc').value = '';
+        
+        // 跳转回首页
+        document.querySelector('.nav-item:first-child').click();
+    }
+    // 启动
+    renderActivities();
+    renderMatches();
+</script>
+</body>
+</html>
